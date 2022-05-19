@@ -32,24 +32,6 @@ test.Test.prototype.stringContains = function(actual, contents, message) {
   });
 };
 
-//
-// skip tests that require a real S3 bucket when in a CI environment
-// and the AWS access key is not available.
-//
-const isCI = process.env.CI && process.env.CI.toLowerCase() === 'true'
-  && !process.env.AWS_ACCESS_KEY_ID;
-
-function ciSkip(...args) {
-  if (isCI) {
-    test.skip(...args);
-  } else {
-    test(...args);
-  }
-}
-ciSkip.skip = function(...args) {
-  test.skip(...args);
-};
-
 test('setup proxy server', (t) => {
   delete process.env.http_proxy;
   delete process.env.https_proxy;
@@ -66,7 +48,7 @@ test('setup proxy server', (t) => {
 
   // make sure the download directory deleted then create an empty one
   rimraf(downloadDir, () => {
-    fs.mkdir('download', (e) => {
+    fs.mkdir(downloadDir, (e) => {
       if (e && e.code !== 'EEXIST') {
         t.error(e);
         return;
@@ -140,6 +122,6 @@ test(`cleanup after ${__filename}`, (t) => {
   delete process.env.NOCK_OFF;
   delete process.env.http_proxy;
   delete process.env.https_proxy;
-  // ignore errors
-  rimraf(downloadDir, () => t.end());
+
+  t.end();
 });
